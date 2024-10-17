@@ -1,5 +1,7 @@
 from random import random
-from Character import Character
+import player as p
+import cpu as c
+from character import Character
 
 ai_character = None
 player_character = None
@@ -28,23 +30,19 @@ def get_names(character_list):
     
 def shuffle_characters(character_list):
     list_length = len(character_list)
-    i = 0
-    while i < 5:
-        j = 0
-        while j < list_length:
+    for i in range(5):
+        for j in range(list_length):
             temp_character = character_list[j]
             random_index = int(random() * list_length)
             character_list[j] = character_list[random_index]
             character_list[random_index] = temp_character
-            j += 1
-        i += 1
     return character_list
 
 def get_unflipped_characters(character_list):
     unflipped_characters = []
     for character in character_list:
         if not character.is_flipped():
-            unflipped_characters.append(character.get_name())
+            unflipped_characters.append(character.name)
     return unflipped_characters
 
 def print_unflipped_characters(character_list):
@@ -54,25 +52,9 @@ def print_unflipped_characters(character_list):
         print_string += f"\n{character}"
     print(print_string)
 
-def flip_matching_descs(character_list, user_input, aspect):
-    matches = []
-    not_matches = []
-    for character in character_list:
-        if character.check_aspect(user_input, aspect):
-            matches.append(character)
-        else:
-            not_matches.append(character)
-
-    if ai_character.check_aspect(user_input, aspect):
-        print("\n[CPU] Yes")
-        chosen_list = not_matches
-    else:
-        print("\n[CPU] No")
-        chosen_list = matches
-
-    for character in chosen_list:
-        if not character.is_flipped():
-            character.flip_down()
+def player_win():
+    print("Congratulations! You win!")
+    exit(0)
 
 if __name__ == "__main__":
     while True:
@@ -80,33 +62,19 @@ if __name__ == "__main__":
         character_list = shuffle_characters(character_list)
         available_characters = []
         available_characters = character_list.copy()
-        ai_character = available_characters.pop()
-        player_character = available_characters.pop()
+        player = p.Player(available_characters.pop(), shuffle_characters(character_list))
+        cpu = c.CPU(available_characters.pop(), shuffle_characters(character_list))
         character_list = shuffle_characters(character_list)
-        # print(ai_character.list())
 
         while True:
             print("")
-            user_input = input("[PLAYER] ")
-            if "male" in user_input:
-                flip_matching_descs(character_list, user_input, "gender")
-            elif "eye" in user_input:
-                flip_matching_descs(character_list, user_input, "eyes")
-            elif "hat" in user_input:
-                flip_matching_descs(character_list, user_input, "hat")
-            elif "bald" in user_input:
-                flip_matching_descs(character_list, user_input, "bald")
-            elif "facial" in user_input or \
-                "mustache" in user_input or \
-                "beard" in user_input:
-                flip_matching_descs(character_list, user_input, "facial hair")
-            elif "hair" in user_input:
-                flip_matching_descs(character_list, user_input, "hair")
-            elif "glasses" in user_input:
-                flip_matching_descs(character_list, user_input, "glasses")
-            elif "rosy cheeks" in user_input:
-                flip_matching_descs(character_list, user_input, "rosy cheeks")
-            elif "restart" == user_input:
-                break
-
-            print_unflipped_characters(character_list)
+            # get user input as to what question to ask cpu, flip down characters based on result
+            aspect = player.ask_question()
+            if aspect == None:
+                print("No recognizable trait within question, please try again.")
+                continue
+            cpu_has_aspect = cpu.has_aspect(player.player_input, aspect)
+            if aspect == "character" and cpu_has_aspect:
+                player_win()
+            player.flip_matching_descs(aspect, cpu_has_aspect)
+            print_unflipped_characters(player.character_list)

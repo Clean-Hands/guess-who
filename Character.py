@@ -7,9 +7,9 @@ class Character():
         self.name = name
         self.letter_gender = gender
         if gender == 'f':
-            self.gender = "female"
+            self.gender = ["female", "woman"]
         else:
-            self.gender = "male"
+            self.gender = ["male", "man"]
         self.eye_color = eye_color
         self.hair_descs = hair_descs
         self.hat_boolean = hat_boolean
@@ -18,9 +18,6 @@ class Character():
         self.glasses_boolean = glasses_boolean
         self.rosy_cheeks_boolean = rosy_cheeks_boolean
         self.flipped_down = False
-
-    def get_name(self):
-        return self.name
 
     def list(self):
         temp_list = []
@@ -34,6 +31,12 @@ class Character():
         temp_list.append(self.glasses_boolean)
         temp_list.append(self.rosy_cheeks_boolean)
         return temp_list
+    
+    def gender_logic(self, user_input) -> bool:
+        for gender in self.gender:
+            if gender in user_input.split():
+                return True
+        return False
 
     def hair_logic(self, user_input) -> bool:
         for hair_desc in self.hair_descs:
@@ -45,7 +48,7 @@ class Character():
         if self.facial_hair_descs == ['']:
             return False
         for facial_hair_desc in self.facial_hair_descs:
-            if facial_hair_desc in user_input.split():
+            if facial_hair_desc in user_input:
                 return True
         for description in ["beard","mustache","short","long"]:
             if description in user_input:
@@ -54,7 +57,7 @@ class Character():
 
     def check_aspect(self, user_input, aspect) -> bool:
         if aspect == "gender":
-            return self.gender in user_input.split()
+            return self.gender_logic(user_input)
         elif aspect == "eyes":
             return self.eye_color in user_input.split()
         elif aspect == "hair":
@@ -69,6 +72,8 @@ class Character():
             return self.glasses_boolean
         elif aspect == "rosy cheeks":
             return self.rosy_cheeks_boolean
+        elif aspect == "character":
+            return self.name in user_input.split()
         else:
             return False
 
